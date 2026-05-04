@@ -55,10 +55,10 @@ const D = {
     { id: "ai",     name: "Automation & Custom AI",      duration: "4–16 weeks",  desc: "Workflow agents, document AI, and LLM features built on top of your existing stack and policies." },
   ],
   founders: [
-    { name: "Gururaja Bhatt", role: "Founder · CEO",    tag: "Strategy",    initials: "GB" },
-    { name: "Jidesh Kumar",   role: "Co-founder · CTO", tag: "Engineering", initials: "JK" },
-    { name: "Indira Hegde",   role: "Co-founder · Ops", tag: "Operations",  initials: "IH" },
-    { name: "Rakshak C R",    role: "Co-founder · CFO", tag: "Finance",     initials: "RR" },
+    { name: "Gururaja Bhatt", role: "Founder · CEO",    tag: "Strategy",    initials: "GB", photo: "gururaja.jpg" },
+    { name: "Jidesh Kumar",   role: "Co-founder · CTO", tag: "Engineering", initials: "JK", photo: "jidesh.jpg" },
+    { name: "Indira Hegde",   role: "Co-founder · Ops", tag: "Operations",  initials: "IH", photo: "indira.jpg" },
+    { name: "Rakshak C R",    role: "Co-founder · CFO", tag: "Finance",     initials: "RR", photo: "rakshak.jpg" },
   ],
   clients: [
     "PUMA","ARVIND","MANIPAL","LIVSPACE","HALODOC","KAPIVA",
@@ -568,7 +568,9 @@ function About() {
         D.founders.map(f =>
           h('div', { className:'founder' },
             h('div', { className:'founder-photo' },
-              FounderArt(f.initials),
+              f.photo
+                ? h('img', { src: f.photo, alt: f.name, onerror: function(){ this.style.display='none'; } })
+                : FounderArt(f.initials),
               h('span', { className:'founder-tag' }, f.tag.toUpperCase())
             ),
             h('div', null,

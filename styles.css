@@ -575,6 +575,12 @@ section.hero { padding-top: 140px; min-height: 100vh; display: flex; align-items
   border: 1px solid var(--line);
 }
 .founder-photo svg { width: 100%; height: 100%; }
+.founder-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .founder-photo::after {
   content: '';
   position: absolute; inset: 0;
