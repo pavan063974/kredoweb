@@ -270,7 +270,7 @@ function Icon(name, size = 18) {
 function Logo() {
   return h('div', { className:'logo', onClick:() => window.scrollTo({ top:0, behavior:'smooth' }) },
     h('div', { className:'logo-mark' },
-      h('img', { src:'logo.jpg', alt:'Kredo', style:{ width:'22px', height:'22px', objectFit:'contain' } })
+      h('img', { src:'logo.png', alt:'Kredo', style:{ width:'40px', height:'40px', objectFit:'contain' } })
     ),
     h('div', { className:'logo-text' },
       h('div', { className:'logo-brand' }, D.brand.name),
