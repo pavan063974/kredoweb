@@ -743,7 +743,116 @@ function WorldMap() {
   );
 }
 
+// ---- World Offices (Leaflet dark map — no API key needed) ----
 function MapSection() {
+  let mapEl;
+
+  const officeCoords = [
+    { city: 'BENGALURU',       addr: D.offices[0].addr, lat: 12.9243, lng:  77.5878 },
+    { city: 'MONROEVILLE, PA', addr: D.offices[1].addr, lat: 40.4267, lng: -79.7647 }
+  ];
+
+  function ensureLeaflet(cb) {
+    if (window.L) { cb(); return; }
+    // CSS
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+    // JS
+    if (!document.getElementById('leaflet-js')) {
+      const s = document.createElement('script');
+      s.id = 'leaflet-js';
+      s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      s.async = true;
+      s.onload = cb;
+      document.head.appendChild(s);
+    } else {
+      const wait = setInterval(() => {
+        if (window.L) { clearInterval(wait); cb(); }
+      }, 80);
+    }
+  }
+
+  function initMap() {
+    if (!mapEl || !window.L) return;
+    if (mapEl._leafletInited) return;
+    mapEl._leafletInited = true;
+
+    const map = L.map(mapEl, {
+      zoomControl: true,
+      attributionControl: false,
+      worldCopyJump: true,
+      minZoom: 2,
+      maxZoom: 14,
+      scrollWheelZoom: false   // don't hijack page scroll; users can still drag + use zoom buttons
+    });
+
+    // CartoDB dark matter — free, no key, matches site palette
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Country labels layer (subtle)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      opacity: 0.6
+    }).addTo(map);
+
+    // Custom HTML pins reusing your existing .map-pin styling
+    officeCoords.forEach(o => {
+      const html = `
+        <div class="map-pin-card">
+          <div class="city">${o.city}</div>
+          <div class="addr">${o.addr}</div>
+        </div>
+        <div class="map-pin-tail"></div>
+        <div class="map-pin-dot"></div>
+      `;
+      const icon = L.divIcon({
+        className: 'map-pin map-pin-leaflet',
+        html,
+        iconSize: [220, 110],
+        iconAnchor: [110, 110]   // bottom-center anchor so dot sits on coordinate
+      });
+      L.marker([o.lat, o.lng], { icon, interactive: false }).addTo(map);
+
+      // Add a small flight arc between the two offices later
+    });
+
+    // Flight arc (dashed) between the two offices
+    const arcPts = [];
+    const a = officeCoords[0], b = officeCoords[1];
+    const steps = 64;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      // simple great-circle-ish curve via slerp on lat/lng with mid-elevation bow
+      const lat = a.lat + (b.lat - a.lat) * t + Math.sin(t * Math.PI) * 18;
+      const lng = a.lng + (b.lng - a.lng) * t;
+      arcPts.push([lat, lng]);
+    }
+    L.polyline(arcPts, {
+      color: '#6cf2c8',
+      weight: 1.2,
+      opacity: 0.65,
+      dashArray: '4 6'
+    }).addTo(map);
+
+    // Fit both offices with padding
+    const bounds = L.latLngBounds(officeCoords.map(o => [o.lat, o.lng]));
+    map.fitBounds(bounds, { padding: [80, 140] });
+
+    // Disable click+drag fighting with the floating cards
+    setTimeout(() => map.invalidateSize(), 100);
+  }
+
+  setTimeout(() => ensureLeaflet(initMap), 50);
+
   return h('section', { id:'offices', className:'page-section', 'data-screen-label':'08 Offices' },
     h('div', { className:'section-head' },
       h('div', { className:'section-head-l' },
@@ -751,23 +860,11 @@ function MapSection() {
         h('h2',   { className:'section-title' }, 'Two cities, ', h('em', null, 'one team'), '.')
       ),
       h('div', { className:'section-head-r' },
-        'Bengaluru is home. Dallas is the bridge. Engineers, accountants and ops staff working overlapping shifts so quarter-close never sleeps.'
+        'Bengaluru is home. Monroeville is the bridge. Engineers, accountants and ops staff working overlapping shifts so quarter-close never sleeps.'
       )
     ),
     h('div', { className:'map-wrap' },
-      h('div', { className:'map-canvas' },
-        WorldMap(),
-        D.offices.map(o =>
-          h('div', { className:'map-pin', style:{ left:`${o.x}%`, top:`${o.y}%` } },
-            h('div', { className:'map-pin-card' },
-              h('div', { className:'city' }, o.city),
-              h('div', { className:'addr' }, o.addr)
-            ),
-            h('div', { className:'map-pin-tail' }),
-            h('div', { className:'map-pin-dot' })
-          )
-        )
-      )
+      h('div', { className:'map-canvas', ref:(el) => mapEl = el })
     )
   );
 }

@@ -1270,3 +1270,31 @@ section.page-section { padding: 100px 32px; }
 
 /* Footer cert badges */
 .foot-cert-badge       { background: transparent !important; }
+
+/* Leaflet container needs explicit height + dark bg before tiles load */
+.map-canvas { background: #04060a; }
+.map-canvas .leaflet-container { background: #04060a; height: 100%; width: 100%; border-radius: 14px; }
+
+/* Hide leaflet's default attribution flag (we keep it minimal) */
+.leaflet-control-attribution { display: none !important; }
+
+/* Restyle leaflet zoom buttons to match site */
+.leaflet-touch .leaflet-bar a,
+.leaflet-bar a {
+  background: rgba(8,10,14,0.85) !important;
+  color: #fff !important;
+  border-color: var(--line) !important;
+  backdrop-filter: blur(8px);
+}
+.leaflet-bar a:hover { background: rgba(108,242,200,0.15) !important; color: var(--acc) !important; }
+
+/* Our custom pins — leaflet wraps divIcon in a container; let cards overflow */
+.map-pin-leaflet {
+  background: transparent !important;
+  border: none !important;
+  overflow: visible !important;
+  pointer-events: none;
+}
+.map-pin-leaflet .map-pin-card,
+.map-pin-leaflet .map-pin-tail,
+.map-pin-leaflet .map-pin-dot { pointer-events: auto; }
